@@ -1,0 +1,12 @@
+{% load content_template_tags %} 
+
+<div class="menu">
+    <ul>
+        {% for item in pagemenu.items %}
+    		<li{% if item in pagemenu.active_items %} class="on"{% endif %}>
+                <span></span><a href="{% smart_query_string item.get.name item.get.value %}">{{ item.title }}</a><span></span>
+                {% comment %}<span></span><a href="{{ filterset.action_url}}{% smart_query_string field.name choice.0%}">{{ choice.1 }}</a><span></span>{% endcomment %}
+            </li>
+        {% endfor %}
+	</ul>
+</div><!--/menu-->
