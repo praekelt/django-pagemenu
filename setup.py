@@ -1,16 +1,12 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='radio2000',
+    name='django-pagemenu',
     version='dev',
-    description='Radio2000 Django project with site specific customizations.',
+    description='Django app for page menus with items altering querysets or linking directly to other views.',
     author='Praekelt Consulting',
     author_email='dev@praekelt.com',
-    url='https://github.com/praekelt/radio2000',
+    url='https://github.com/praekelt/django-pagemenu',
     packages = find_packages(),
-    install_requires = [
-        #'django-generate>=0.0.1',
-        'django-generate==dev',
-    ],
     include_package_data=True,
 )
