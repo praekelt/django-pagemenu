@@ -5,11 +5,11 @@ class Item(object):
         get['value'] = str(get['value'])
         self.get=get
 
-class RangeItem(Item):
+class IntegerFieldRangeItem(Item):
     def __init__(self, title, get, field_name, filter_range, default=False):
         self.field_name = field_name
         self.filter_range = filter_range
-        super(RangeItem, self).__init__(title, get, default)
+        super(IntegerFieldRangeItem, self).__init__(title, get, default)
 
     def action(self, queryset):
         return queryset.filter(**{"%s__range" % self.field_name: self.filter_range})
