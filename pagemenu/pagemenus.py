@@ -1,4 +1,4 @@
-from items import RangeItem
+from items import IntegerFieldRangeItem
 
 class PageMenu(object):
     def __init__(self, queryset, request):
@@ -24,7 +24,7 @@ class PageMenu(object):
         
         return active_items
 
-class IntegerRangePageMenu(PageMenu):
+class IntegerFieldRangePageMenu(PageMenu):
     def __init__(self, queryset, request, field_name, interval):
         self.items = []
 
@@ -33,7 +33,7 @@ class IntegerRangePageMenu(PageMenu):
         for range_start in ranges:
             range_end = range_start + interval
             range_start = range_start + 1
-            self.items.append(RangeItem(
+            self.items.append(IntegerFieldRangeItem(
                 title="%s-%s" % (range_start, range_end),
                 field_name=field_name,
                 filter_range=(range_start, range_end),
@@ -42,4 +42,4 @@ class IntegerRangePageMenu(PageMenu):
             ))
             i += 1
 
-        super(IntegerRangePageMenu, self).__init__(queryset, request)
+        super(IntegerFieldRangePageMenu, self).__init__(queryset, request)
