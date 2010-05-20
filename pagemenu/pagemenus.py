@@ -1,4 +1,4 @@
-from items import IntegerFieldRangeItem
+from items import IntegerFieldRangeItem, MostRecentItem, ThisWeekendItem, ThisWeekItem, ThisMonthItem
 
 class PageMenu(object):
     def __init__(self, queryset, request):
@@ -21,6 +21,7 @@ class PageMenu(object):
                     active_items.append(item)
         
         return active_items
+    
 
 class IntegerFieldRangePageMenu(PageMenu):
     def __init__(self, queryset, request, field_name, interval):
@@ -34,11 +35,43 @@ class IntegerFieldRangePageMenu(PageMenu):
             self.items.append(IntegerFieldRangeItem(
                 request=request,
                 title="%s-%s" % (range_start, range_end),
+                get={'name': 'range', 'value': range_start},
                 field_name=field_name,
                 filter_range=(range_start, range_end),
-                get={'name': 'range', 'value': range_start},
                 default=i==0,
             ))
             i += 1
 
         super(IntegerFieldRangePageMenu, self).__init__(queryset, request)
+
+class DateFieldIntervalPageMenu(PageMenu):
+    def __init__(self, queryset, request, field_name):
+        self.items = [
+            MostRecentItem(
+                request=request,
+                title="Upcoming",
+                get={'name': 'filter', 'value': 'recent'},
+                field_name=field_name,
+                default=True,
+            ), 
+            ThisWeekendItem(
+                request=request,
+                title="This Weekend",
+                get={'name': 'filter', 'value': 'weekend'},
+                field_name=field_name,
+            ), 
+            ThisWeekItem(
+                request=request,
+                title="Next 7 Days",
+                get={'name': 'filter', 'value': 'week'},
+                field_name=field_name,
+            ), 
+            ThisMonthItem(
+                request=request,
+                title="This Month",
+                get={'name': 'filter', 'value': 'month'},
+                field_name=field_name,
+            ), 
+        ]
+        
+        super(DateFieldIntervalPageMenu, self).__init__(queryset, request)
