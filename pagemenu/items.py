@@ -1,6 +1,11 @@
+from datetime import datetime, timedelta
+
 from django.conf import settings
 from django.core.urlresolvers import RegexURLResolver, Resolver404
+from django.contrib.contenttypes.models import ContentType
 from django.utils.encoding import smart_str
+
+from secretballot.models import Vote
 
 class Item(object):
     def __init__(self, request, title, default):
@@ -20,12 +25,28 @@ class GetItem(Item):
                 return request.GET[self.get['name']] == self.get['value']
 
         return False
+    
+    def get_absolute_url(self):
+        addition_pairs = [(self.get['name'], self.get['value']),]
+        remove_keys = ['page', ]
+        q = dict([(k, v) for k, v in self.request.GET.items()])
+        for key in remove_keys:
+            if q.has_key(key):
+                del q[key]
+        for key, value in addition_pairs:
+            if key:
+                if value:
+                   q[key] = value
+                else:
+                    q.pop(key, None)
+            qs = '&'.join(['%s=%s' % (k, v) for k, v in q.items()])
+        return '?' + qs if len(q) else ''
 
 class IntegerFieldRangeItem(GetItem):
-    def __init__(self, title, get, field_name, filter_range, default=False):
+    def __init__(self, request, title, get, field_name, filter_range, default=False):
         self.field_name = field_name
         self.filter_range = filter_range
-        super(IntegerFieldRangeItem, self).__init__(title, get, default)
+        super(IntegerFieldRangeItem, self).__init__(request, title, get, default)
 
     def action(self, queryset):
         return queryset.filter(**{"%s__range" % self.field_name: self.filter_range})
@@ -76,3 +97,26 @@ class URLPatternItem(Item):
 
     def get_absolute_url(self):
         return self.path
+
+class MostRecentItem(GetItem):
+    def action(self, queryset):
+        return queryset.order_by('-created')
+
+class MostLikedItem(GetItem):
+    def action(self, queryset):
+        return queryset.extra(select={
+                'vote_score': '(SELECT COUNT(*) from %s WHERE vote=1 AND object_id=%s.%s AND content_type_id=%s) - (SELECT COUNT(*) from %s WHERE vote=-1 AND object_id=%s.%s AND content_type_id=%s)' % (Vote._meta.db_table, queryset.model._meta.db_table, queryset.model._meta.pk.attname, ContentType.objects.get_for_model(queryset.model).id, Vote._meta.db_table, queryset.model._meta.db_table, queryset.model._meta.pk.attname, ContentType.objects.get_for_model(queryset.model).id)}).order_by('-vote_score')
+
+class ThisWeekItem(GetItem):
+    def action(self, queryset):
+        return queryset.filter(**{
+            'created__gte': (datetime.today() - timedelta(days=7)).strftime('%Y-%m-%d'),
+            'created__lt': (datetime.today()+timedelta(days=1)).strftime('%Y-%m-%d'),
+        })
+
+class ThisMonthItem(GetItem):
+    def action(self, queryset):
+        return queryset.filter(**{
+            'created__year': datetime.today().year,
+            'created__month': datetime.today().month
+        })
