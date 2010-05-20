@@ -32,6 +32,7 @@ class IntegerFieldRangePageMenu(PageMenu):
             range_end = range_start + interval
             range_start = range_start + 1
             self.items.append(IntegerFieldRangeItem(
+                request=request,
                 title="%s-%s" % (range_start, range_end),
                 field_name=field_name,
                 filter_range=(range_start, range_end),
