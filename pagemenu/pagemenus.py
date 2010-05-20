@@ -12,10 +12,8 @@ class PageMenu(object):
     def get_active_items(self):
         active_items = []
         for item in self.items:
-            if hasattr(item, 'get'):
-                if self.request.GET.has_key(item.get['name']):
-                    if self.request.GET[item.get['name']] == item.get['value']:
-                         active_items.append(item)
+            if item.is_active(self.request):
+                active_items.append(item)
         
         if not active_items:
             for item in self.items:
