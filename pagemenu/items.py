@@ -14,9 +14,10 @@ class Item(object):
         self.default=default
             
 class GetItem(Item):
-    def __init__(self, request, title, get, default):
+    def __init__(self, request, title, get, field_name='', default=False):
         get['value'] = str(get['value'])
         self.get=get
+        self.field_name = field_name
         super(GetItem, self).__init__(request, title, default)
 
     def is_active(self, request):
@@ -46,7 +47,7 @@ class IntegerFieldRangeItem(GetItem):
     def __init__(self, request, title, get, field_name, filter_range, default=False):
         self.field_name = field_name
         self.filter_range = filter_range
-        super(IntegerFieldRangeItem, self).__init__(request, title, get, default)
+        super(IntegerFieldRangeItem, self).__init__(request, title, get, field_name, default)
 
     def action(self, queryset):
         return queryset.filter(**{"%s__range" % self.field_name: self.filter_range})
@@ -100,7 +101,7 @@ class URLPatternItem(Item):
 
 class MostRecentItem(GetItem):
     def action(self, queryset):
-        return queryset.order_by('-created')
+        return queryset.order_by('-%s' % self.field_name)
 
 class MostLikedItem(GetItem):
     def action(self, queryset):
@@ -110,13 +111,20 @@ class MostLikedItem(GetItem):
 class ThisWeekItem(GetItem):
     def action(self, queryset):
         return queryset.filter(**{
-            'created__gte': (datetime.today() - timedelta(days=7)).strftime('%Y-%m-%d'),
-            'created__lt': (datetime.today()+timedelta(days=1)).strftime('%Y-%m-%d'),
+            '%s__gte' % self.field_name: (datetime.today() - timedelta(days=7)).strftime('%Y-%m-%d'),
+            '%s__lt' % self.field_name: (datetime.today()+timedelta(days=1)).strftime('%Y-%m-%d'),
+        })
+        
+class ThisWeekendItem(GetItem):
+    def action(self, queryset):
+        return queryset.filter(**{
+            '%s__gte' % self.field_name: (datetime.today() - timedelta(days=7)).strftime('%Y-%m-%d'),
+            '%s__lt' % self.field_name: (datetime.today()+timedelta(days=1)).strftime('%Y-%m-%d'),
         })
 
 class ThisMonthItem(GetItem):
     def action(self, queryset):
         return queryset.filter(**{
-            'created__year': datetime.today().year,
-            'created__month': datetime.today().month
+            '%s__year' % self.field_name: datetime.today().year,
+            '%s__month' % self.field_name: datetime.today().month
         })
