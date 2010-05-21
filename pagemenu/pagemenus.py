@@ -1,4 +1,4 @@
-from items import IntegerFieldRangeItem, MostRecentItem, ThisWeekendItem, ThisWeekItem, ThisMonthItem
+from items import IntegerFieldRangeItem, CalEntryNext7DaysItem, CalEntryThisWeekendItem, CalEntryThisMonthItem, CalEntryUpcomingItem
 
 class PageMenu(object):
     def __init__(self, queryset, request):
@@ -47,26 +47,26 @@ class IntegerFieldRangePageMenu(PageMenu):
 class DateFieldIntervalPageMenu(PageMenu):
     def __init__(self, queryset, request, field_name):
         self.items = [
-            MostRecentItem(
+            CalEntryUpcomingItem(
                 request=request,
                 title="Upcoming",
                 get={'name': 'filter', 'value': 'recent'},
                 field_name=field_name,
                 default=True,
             ), 
-            ThisWeekendItem(
+            CalEntryThisWeekendItem(
                 request=request,
                 title="This Weekend",
                 get={'name': 'filter', 'value': 'weekend'},
                 field_name=field_name,
             ), 
-            ThisWeekItem(
+            CalEntryNext7DaysItem(
                 request=request,
                 title="Next 7 Days",
                 get={'name': 'filter', 'value': 'week'},
                 field_name=field_name,
             ), 
-            ThisMonthItem(
+            CalEntryThisMonthItem(
                 request=request,
                 title="This Month",
                 get={'name': 'filter', 'value': 'month'},

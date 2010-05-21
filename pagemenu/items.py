@@ -103,6 +103,10 @@ class MostRecentItem(GetItem):
     def action(self, queryset):
         return queryset.order_by('-%s' % self.field_name)
 
+class UpcomingItem(GetItem):
+    def action(self, queryset):
+        return queryset.order_by('%s' % self.field_name)
+
 class MostLikedItem(GetItem):
     def action(self, queryset):
         return queryset.extra(select={
@@ -128,3 +132,60 @@ class ThisMonthItem(GetItem):
             '%s__year' % self.field_name: datetime.today().year,
             '%s__month' % self.field_name: datetime.today().month
         })
+        
+class CalEntryNext7DaysItem(GetItem):
+    def action(self, queryset):
+        return queryset.next7days()
+        
+class CalEntryThisWeekendItem(GetItem):
+    def action(self, queryset):
+        return queryset.thisweekend()
+        
+class CalEntryThisMonthItem(GetItem):
+    def action(self, queryset):
+        return queryset.thismonth()
+        
+class CalEntryUpcomingItem(GetItem):
+    def action(self, queryset):
+        return queryset.upcoming()
+
+
+
+'''
+
+    def next7days(self):
+        start = datetime.now()
+        end = start + timedelta(days=7)
+        return self.range(start, end)
+
+    def next14days(self):
+        start = datetime.now()
+        end = start + timedelta(days=14)
+        return self.range(start, end)
+
+    def thisweekend(self):
+        now = datetime.now()
+        start = now + timedelta(4 - now.weekday())
+        end = now + timedelta(6 - now.weekday())
+        result = self.range(start, end)
+
+        # set the entry start and end dates to be contained within the weekend
+        for item in result:
+            if item.start < start:
+                item.start = start
+            if item.end > end:
+                item.end = end 
+        return result
+
+    def thismonth(self):
+        start = datetime.now()
+        end = datetime(start.year, (start.month+1), 1)
+        return self.range(start, end)
+
+    def nextmonth(self):
+        now = datetime.now()
+        start = datetime(now.year, (now.month+1), 1)
+        end = datetime(now.year, (now.month+2), 1)
+        return self.range(start, end)
+    
+'''
