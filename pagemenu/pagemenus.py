@@ -22,7 +22,6 @@ class PageMenu(object):
         
         return active_items
     
-
 class IntegerFieldRangePageMenu(PageMenu):
     def __init__(self, queryset, request, field_name, interval):
         self.items = []
