@@ -14,18 +14,21 @@ class Item(object):
         self.default=default
             
 class GetItem(Item):
-    def __init__(self, request, title, get, field_name='', default=False):
+    def __init__(self, request, title, get, field_name='', default=False, *args, **kwargs):
         get['value'] = str(get['value'])
         self.get=get
         self.field_name = field_name
-        super(GetItem, self).__init__(request, title, default)
+        super(GetItem, self).__init__(request, title, default, *args, **kwargs)
 
     def is_active(self, request):
         if hasattr(self, 'get'):
             if request.GET.has_key(self.get['name']):
                 return request.GET[self.get['name']] == self.get['value']
 
-        return False
+        return self.default
+    
+    def action(self, queryset):
+        return queryset
     
     def get_absolute_url(self):
         addition_pairs = [(self.get['name'], self.get['value']),]
@@ -51,6 +54,10 @@ class IntegerFieldRangeItem(GetItem):
 
     def action(self, queryset):
         return queryset.filter(**{"%s__range" % self.field_name: self.filter_range})
+
+class PagingCountItem(GetItem):
+    def action(self, queryset):
+        return queryset
 
 class URLPatternItem(Item):
     def __init__(self, request, title, path, matching_pattern_names, default):
