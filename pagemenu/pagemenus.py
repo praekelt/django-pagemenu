@@ -14,12 +14,13 @@ class PageMenu(object):
         for item in self.items:
             if item.is_active(self.request):
                 active_items.append(item)
-        
+       
+        # without active items fall back to defaults
         if not active_items:
             for item in self.items:
                 if item.default:
                     active_items.append(item)
-        
+
         return active_items
     
 class IntegerFieldRangePageMenu(PageMenu):
